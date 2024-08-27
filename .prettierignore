@@ -1,0 +1,14 @@
+# Ignore all files in the node_modules directory
+node_modules/**
+
+# Ignore all generated files
+/dist/**
+
+# Ignore all coverage reports
+/coverage/**
+
+# Ignore all TypeScript definition files
+*.d.ts
+
+# Ignore all Git-related files
+.git/**

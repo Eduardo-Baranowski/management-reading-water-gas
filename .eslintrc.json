@@ -1,0 +1,57 @@
+{
+  "extends": ["airbnb-base", "airbnb-typescript/base", "plugin:prettier/recommended"],
+  "plugins": ["eslint-plugin-import-helpers"],
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  },
+  "rules": {
+    "camelcase": "error",
+    "no-console": "error",
+    "import/no-unresolved": "error",
+    "class-methods-use-this": "off",
+    "import/prefer-default-export": "off",
+    "@typescript-eslint/explicit-function-return-type": ["error"],
+    "@typescript-eslint/no-floating-promises": ["error"],
+    "@typescript-eslint/no-misused-promises": [
+      "error",
+      {
+        "checksVoidReturn": false
+      }
+    ],
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "import-helpers/order-imports": [
+      "warn",
+      {
+        "newlinesBetween": "always",
+        "groups": [
+          ["/^express$/"],
+          "module",
+          "/^@/controllers/",
+          "/^@/middlewares/",
+          "/^@/validations/",
+          "/^@/use-cases/",
+          "/^@/services/",
+          "/^@/repositories/",
+          "/^@/dtos/",
+          "/^@/errors/",
+          "/^@/utils/",
+          "/^@/config/",
+          "/^@/database/",
+          "/^@/*/",
+          ["parent", "sibling", "index"]
+        ],
+        "alphabetize": { "order": "asc", "ignoreCase": true }
+      }
+    ]
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {}
+    }
+  }
+}
