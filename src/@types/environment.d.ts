@@ -12,6 +12,7 @@ export declare global {
       DATABASE_PASSWORD: string;
       DATABASE_NAME: string;
       DATABASE_URL: string;
+      GEMINI_API_KEY: string;
     }
   }
 }

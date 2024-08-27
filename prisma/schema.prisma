@@ -12,3 +12,21 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum Type {
+  water @map("water")
+  gas   @map("gas")
+
+  @@map("types")
+}
+
+model Reading {
+  id              Int      @id @default(autoincrement())
+  customerCode    String   @map("customer_code")
+  measureDatetime DateTime @unique @map("measure_datetime")
+  measureType     Type     @map("measure_type")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("readings")
+}
