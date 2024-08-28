@@ -1,6 +1,6 @@
 export class ReadingAlreadyExistsError extends Error {
   constructor(message?: string) {
-    super(message ?? 'Já existe uma leitura para este tipono mês atual');
+    super(message ?? 'Leitura do mês já realizada');
     this.name = 'ReadingAlreadyExistsError';
   }
 }

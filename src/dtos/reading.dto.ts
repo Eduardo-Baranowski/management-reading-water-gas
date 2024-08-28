@@ -1,12 +1,13 @@
 export type Type = 'water' | 'gas';
 
 export type ReadingDto = {
-  id: number;
-  customerCode: string;
-  measureDatetime: Date;
-  measureType: Type;
-  createdAt: Date;
-  updatedAt: Date;
+  // id: number;
+  // customerCode: string;
+  measure_uuid: string;
+  measure_value: number;
+  // measureType: Type;
+  // createdAt: Date;
+  // updatedAt: Date;
 };
 
 export type ReadingExistsInputDto = {
@@ -21,5 +22,7 @@ export type CreateReadingInputDto = {
   customerCode: string;
   measureDatetime: Date;
   measureType: Type;
+  measureValue: number;
+  measureUUID: string;
   image: string;
 };
