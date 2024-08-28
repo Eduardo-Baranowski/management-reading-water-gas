@@ -130,7 +130,12 @@ export class PrismaReadingRepository extends BaseRepository {
   }
 
   async create(input: CreateReadingInputDto): Promise<ReadingOutputDto> {
-    const { customerCode, measureDatetime, measureType, image } = input;
+    const {
+      customer_code: customerCode,
+      measure_datetime: measureDatetime,
+      measure_type: measureType,
+      image,
+    } = input;
 
     const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
 

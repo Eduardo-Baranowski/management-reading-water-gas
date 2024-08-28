@@ -29,9 +29,9 @@ export type UpdateReadingImageInputDto = {
 };
 
 export type CreateReadingInputDto = {
-  customerCode: string;
-  measureDatetime: Date;
-  measureType: Type;
+  customer_code: string;
+  measure_datetime: Date;
+  measure_type: Type;
   measureValue?: number;
   measureUUID?: string;
   image: string;

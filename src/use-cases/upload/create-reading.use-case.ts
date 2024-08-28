@@ -12,7 +12,7 @@ export class CreateReadingUseCase {
 
   async execute(input: CreateReadingInputDto): Promise<ReadingOutputDto> {
     const readingExists = await this.readingRepository.exists({
-      measureDatetime: input.measureDatetime,
+      measureDatetime: input.measure_datetime,
     });
     if (readingExists) {
       throw new ReadingAlreadyExistsError();
