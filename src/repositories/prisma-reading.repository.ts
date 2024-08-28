@@ -76,6 +76,7 @@ export class PrismaReadingRepository extends BaseRepository {
 
     const measureValue = Number(result.response.text());
 
+    console.log('teste');
     const reading = await this.client.reading.create({
       data: {
         customerCode,
