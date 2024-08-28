@@ -10,6 +10,8 @@ import { AwsFileStorageService } from '@/services';
 
 import {
   CreateReadingInputDto,
+  FindAllReadingsInputDto,
+  FindAllReadingsOutPutDto,
   ImageIsNoteBase64InputDto,
   ReadingExistsInputDto,
   ReadingOutputDto,
@@ -226,11 +228,43 @@ export class PrismaReadingRepository extends BaseRepository {
     return PrismaReadingRepository.mapToDto(reading);
   }
 
+  async findAll(input: FindAllReadingsInputDto): Promise<FindAllReadingsOutPutDto[]> {
+    const readings = await this.client.reading.findMany({
+      select: {
+        measureUUID: true,
+        measureDatetime: true,
+        measureType: true,
+        confirmed: true,
+        imageUrl: true,
+        customerCode: true,
+        measureValue: true,
+        id: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      where: {
+        customerCode: input.customer_code,
+      },
+    });
+
+    return readings.map(PrismaReadingRepository.mapToListDto);
+  }
+
   static mapToDto(reading: PrismaReading): ReadingOutputDto {
     return {
       image_url: reading.imageUrl ?? undefined,
       measure_uuid: reading.measureUUID,
       measure_value: reading.measureValue,
+    };
+  }
+
+  static mapToListDto(reading: PrismaReading): FindAllReadingsOutPutDto {
+    return {
+      measure_uuid: reading.measureUUID,
+      measure_datetime: reading.measureDatetime,
+      measure_type: reading.measureType,
+      confirmed: reading.confirmed,
+      image_url: reading.imageUrl ?? undefined,
     };
   }
 }

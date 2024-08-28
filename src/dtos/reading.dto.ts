@@ -41,3 +41,21 @@ export type UpdateReadingInputDto = {
   confirmed_value: number;
   measure_uuid: string;
 };
+
+export type FindAllReadingsInputDto = {
+  customer_code: string;
+  measure_type: string;
+};
+
+export type FindAllReadingsOutPutDto = {
+  measure_uuid: string;
+  measure_datetime: Date;
+  measure_type: string;
+  confirmed: boolean;
+  image_url?: string;
+};
+
+export type FindAllReadingsOutputWitchCustomerDto = {
+  custormer_code: string;
+  measures: FindAllReadingsOutPutDto[];
+};
