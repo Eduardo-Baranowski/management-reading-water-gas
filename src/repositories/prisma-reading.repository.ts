@@ -92,6 +92,19 @@ export class PrismaReadingRepository extends BaseRepository {
     return PrismaReadingRepository.mapToDto(reading);
   }
 
+  async findByCustomerCod(id: string, measureType: string): Promise<true | undefined> {
+    const reading = await this.client.reading.findMany({
+      where: {
+        customerCode: id,
+        measureType: measureType === 'gas' ? 'gas' : 'water',
+      },
+    });
+
+    if (reading.length === 0) return undefined;
+
+    return true;
+  }
+
   async findByConfirmed(id: string): Promise<ReadingOutputDto | undefined> {
     const reading = await this.client.reading.findUnique({
       where: {
@@ -244,6 +257,7 @@ export class PrismaReadingRepository extends BaseRepository {
       },
       where: {
         customerCode: input.customer_code,
+        measureType: input.measure_type === 'gas' ? 'gas' : 'water',
       },
     });
 
