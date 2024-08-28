@@ -2,7 +2,7 @@ import { injectable } from 'tsyringe';
 
 import { PrismaReadingRepository } from '@/repositories';
 
-import { CreateReadingInputDto, ReadingDto } from '@/dtos';
+import { CreateReadingInputDto, ReadingOutputDto } from '@/dtos';
 
 import { ImageIsNotBase64Error, ReadingAlreadyExistsError } from '@/errors';
 
@@ -10,7 +10,7 @@ import { ImageIsNotBase64Error, ReadingAlreadyExistsError } from '@/errors';
 export class CreateReadingUseCase {
   constructor(private readonly readingRepository: PrismaReadingRepository) {}
 
-  async execute(input: CreateReadingInputDto): Promise<ReadingDto> {
+  async execute(input: CreateReadingInputDto): Promise<ReadingOutputDto> {
     const readingExists = await this.readingRepository.exists({
       measureDatetime: input.measureDatetime,
     });

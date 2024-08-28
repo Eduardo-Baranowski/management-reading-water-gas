@@ -13,6 +13,14 @@ export declare global {
       DATABASE_NAME: string;
       DATABASE_URL: string;
       GEMINI_API_KEY: string;
+
+      AVATAR_SIZE: string;
+
+      AWS_REGION: string;
+      AWS_ACCESS_KEY_ID:string;
+      AWS_SECRET_ACCESS_KEY: string;
+      AWS_BUCKET_NAME:string;
+      AWS_BUCKET_URL:string;
     }
   }
 }

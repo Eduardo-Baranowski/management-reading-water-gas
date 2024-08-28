@@ -1,24 +1,48 @@
 import { converBase64ToImage } from 'convert-base64-to-image';
+import fs from 'fs';
 import isBase64 from 'is-base64';
+import crypto from 'node:crypto';
 import path from 'path';
 import { injectable } from 'tsyringe';
 import { v4 as uuidv4 } from 'uuid';
 
+import { AwsFileStorageService } from '@/services';
+
 import {
   CreateReadingInputDto,
   ImageIsNoteBase64InputDto,
-  ReadingDto,
   ReadingExistsInputDto,
+  ReadingOutputDto,
+  UploadFileInputDto,
 } from '@/dtos';
 
+import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleAIFileManager } from '@google/generative-ai/server';
 import { Reading as PrismaReading } from '@prisma/client';
 
 import { BaseRepository } from './base-repository';
 
+interface BuildUploadCommandInput {
+  key: string;
+  file: UploadFileInputDto['file'];
+}
+
 @injectable()
 export class PrismaReadingRepository extends BaseRepository {
+  s3Client = new S3Client({
+    region: String(process.env.AWS_REGION),
+    endpoint: process.env.NODE_ENV === 'development' ? process.env.AWS_ENDPOINT : undefined,
+    forcePathStyle: process.env.NODE_ENV === 'development',
+    credentials:
+      process.env.NODE_ENV === 'development'
+        ? {
+            accessKeyId: String(process.env.AWS_ACCESS_KEY_ID),
+            secretAccessKey: String(process.env.AWS_SECRET_ACCESS_KEY),
+          }
+        : undefined,
+  });
+
   async exists(input: ReadingExistsInputDto): Promise<boolean> {
     const { measureDatetime } = input;
 
@@ -42,7 +66,45 @@ export class PrismaReadingRepository extends BaseRepository {
     return false;
   }
 
-  async create(input: CreateReadingInputDto): Promise<ReadingDto> {
+  async findById(id: number): Promise<ReadingOutputDto | undefined> {
+    const reading = await this.client.reading.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!reading) return undefined;
+
+    return PrismaReadingRepository.mapToDto(reading);
+  }
+
+  private generateRandomFileName(): string {
+    const bytes = 16;
+
+    const randomName = crypto.randomBytes(bytes).toString('hex');
+
+    return randomName;
+  }
+
+  private generateKey(input: UploadFileInputDto): string {
+    const fileName = this.generateRandomFileName();
+    const folder = input.folder ? `${input.folder}/` : '';
+    const key = `${folder}${fileName}.${input.file.extension}`;
+
+    return key;
+  }
+
+  private buildUploadCommand(input: BuildUploadCommandInput): PutObjectCommand {
+    return new PutObjectCommand({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: input.key,
+      Body: input.file.buffer,
+      ContentType: input.file.mimetype,
+      CacheControl: 'max-age=31536000',
+    });
+  }
+
+  async create(input: CreateReadingInputDto): Promise<ReadingOutputDto> {
     const { customerCode, measureDatetime, measureType, image } = input;
 
     const fileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
@@ -76,12 +138,29 @@ export class PrismaReadingRepository extends BaseRepository {
 
     const measureValue = Number(result.response.text());
 
-    console.log('teste');
+    const content = fs.readFileSync(path.resolve(__dirname, '../tmp/image.png'));
+
+    const inputFile: UploadFileInputDto = {
+      file: {
+        buffer: content,
+        extension: 'webp',
+        mimetype: 'image/webp',
+      },
+      folder: 'images',
+    };
+
+    const key = this.generateKey(inputFile);
+
+    const command = this.buildUploadCommand({ key, file: inputFile.file });
+
+    await this.s3Client.send(command);
+
     const reading = await this.client.reading.create({
       data: {
         customerCode,
         measureDatetime,
         measureValue,
+        imageUrl: AwsFileStorageService.generateUrl(key),
         measureUUID: uuidv4(),
         measureType,
       },
@@ -90,6 +169,7 @@ export class PrismaReadingRepository extends BaseRepository {
         customerCode: true,
         measureValue: true,
         measureDatetime: true,
+        imageUrl: true,
         measureType: true,
         measureUUID: true,
         updatedAt: true,
@@ -100,8 +180,9 @@ export class PrismaReadingRepository extends BaseRepository {
     return PrismaReadingRepository.mapToDto(reading);
   }
 
-  static mapToDto(reading: PrismaReading): ReadingDto {
+  static mapToDto(reading: PrismaReading): ReadingOutputDto {
     return {
+      image_url: reading.imageUrl ?? undefined,
       measure_uuid: reading.measureUUID,
       measure_value: reading.measureValue,
     };
