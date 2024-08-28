@@ -8,3 +8,8 @@ export const createReadingBodySchema = z.object({
   measureDatetime: z.date({ coerce: true }),
   customerCode: z.string({ required_error: 'Informe o customer code' }),
 });
+
+export const updateReadingBodySchema = z.object({
+  confirmed_value: z.number(),
+  measure_uuid: z.string(),
+});

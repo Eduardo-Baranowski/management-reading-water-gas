@@ -26,8 +26,9 @@ model Reading {
   measureDatetime DateTime @unique @map("measure_datetime")
   measureType     Type     @map("measure_type")
   measureValue    Int      @map("measure_value")
-  measureUUID     String   @map("measure_uuid")
+  measureUUID     String   @unique @map("measure_uuid")
   imageUrl        String?  @map("image_url")
+  confirmed       Boolean  @default(false)
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
 

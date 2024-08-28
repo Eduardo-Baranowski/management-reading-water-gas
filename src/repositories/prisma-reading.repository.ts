@@ -78,6 +78,31 @@ export class PrismaReadingRepository extends BaseRepository {
     return PrismaReadingRepository.mapToDto(reading);
   }
 
+  async findByUUID(id: string): Promise<ReadingOutputDto | undefined> {
+    const reading = await this.client.reading.findUnique({
+      where: {
+        measureUUID: id,
+      },
+    });
+
+    if (!reading) return undefined;
+
+    return PrismaReadingRepository.mapToDto(reading);
+  }
+
+  async findByConfirmed(id: string): Promise<ReadingOutputDto | undefined> {
+    const reading = await this.client.reading.findUnique({
+      where: {
+        measureUUID: id,
+        confirmed: true,
+      },
+    });
+
+    if (!reading) return undefined;
+
+    return PrismaReadingRepository.mapToDto(reading);
+  }
+
   private generateRandomFileName(): string {
     const bytes = 16;
 
@@ -170,10 +195,26 @@ export class PrismaReadingRepository extends BaseRepository {
         measureValue: true,
         measureDatetime: true,
         imageUrl: true,
+        confirmed: true,
         measureType: true,
         measureUUID: true,
         updatedAt: true,
         createdAt: true,
+      },
+    });
+
+    return PrismaReadingRepository.mapToDto(reading);
+  }
+
+  async update(input: ReadingOutputDto): Promise<ReadingOutputDto> {
+    const reading = await this.client.reading.update({
+      where: {
+        measureUUID: input.measure_uuid,
+        confirmed: false,
+      },
+      data: {
+        measureValue: input.measure_value,
+        confirmed: true,
       },
     });
 

@@ -37,6 +37,7 @@ export type CreateReadingInputDto = {
   image: string;
 };
 
-export type UpdateUserInputDto = {
-  id: number;
+export type UpdateReadingInputDto = {
+  confirmed_value: number;
+  measure_uuid: string;
 };

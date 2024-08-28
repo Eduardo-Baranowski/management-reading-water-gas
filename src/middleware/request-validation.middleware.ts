@@ -2,8 +2,6 @@ import { RequestHandler } from 'express';
 
 import { z, ZodTypeAny } from 'zod';
 
-import { validationError } from '@/utils';
-
 type RequestSchemaKey = 'body' | 'query' | 'params';
 
 export type RequestSchema = {
@@ -31,7 +29,11 @@ export const validateRequest =
       return next();
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return response.status(400).json(validationError(error));
+        const errorResponse = {
+          error_code: 'MEASURE_NOT_FOUND',
+          error_description: error.errors[0].message,
+        };
+        return response.status(400).json(errorResponse);
       }
 
       throw error;
