@@ -5,7 +5,7 @@ import path from 'path';
 import { injectable } from 'tsyringe';
 import { v4 as uuidv4 } from 'uuid';
 
-import { AwsClientService } from '@/services';
+import { AwsClientService, GeminiClientService } from '@/services';
 
 import {
   CreateReadingInputDto,
@@ -14,11 +14,8 @@ import {
   ImageIsNoteBase64InputDto,
   ReadingExistsInputDto,
   ReadingOutputDto,
-  UploadFileInputDto,
 } from '@/dtos';
 
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import { GoogleAIFileManager } from '@google/generative-ai/server';
 import { Reading as PrismaReading } from '@prisma/client';
 
 import { BaseRepository } from './base-repository';
@@ -106,47 +103,21 @@ export class PrismaReadingRepository extends BaseRepository {
       image,
     } = input;
 
-    const googleFileManager = new GoogleAIFileManager(process.env.GEMINI_API_KEY);
-
     const pathToSaveImage = './tmp/image.png';
     converBase64ToImage(image, pathToSaveImage);
 
-    const uploadResponse = await googleFileManager.uploadFile(
-      path.resolve(__dirname, '../tmp/image.png'),
-      {
-        mimeType: 'image/jpeg',
-        displayName: 'Jetpack drawing',
-      },
+    const uploadResponse = await GeminiClientService.uploadResponse('../tmp/image.png');
+
+    const result = await GeminiClientService.model(
+      uploadResponse.file.mimeType,
+      uploadResponse.file.uri,
     );
-
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-    const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
-    });
-
-    const result = await model.generateContent([
-      {
-        fileData: {
-          mimeType: uploadResponse.file.mimeType,
-          fileUri: uploadResponse.file.uri,
-        },
-      },
-      { text: 'Descreva o valor contido na imagem apenas com o número.' },
-    ]);
 
     const measureValue = Number(result.response.text());
 
     const content = fs.readFileSync(path.resolve(__dirname, '../tmp/image.png'));
 
-    const inputFile: UploadFileInputDto = {
-      file: {
-        buffer: content,
-        extension: 'webp',
-        mimetype: 'image/webp',
-      },
-      folder: 'images',
-    };
+    const inputFile = AwsClientService.inputFile(content);
 
     const key = AwsClientService.generateKey(inputFile);
 

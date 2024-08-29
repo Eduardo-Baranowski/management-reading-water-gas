@@ -56,4 +56,16 @@ export const AwsClientService = {
 
     return `${process.env.AWS_BUCKET_URL!}/${key}`;
   },
+
+  inputFile(content: Buffer): UploadFileInputDto {
+    const inputFile: UploadFileInputDto = {
+      file: {
+        buffer: content,
+        extension: 'webp',
+        mimetype: 'image/webp',
+      },
+      folder: 'images',
+    };
+    return inputFile;
+  },
 };
