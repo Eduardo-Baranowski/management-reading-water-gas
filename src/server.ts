@@ -2,11 +2,14 @@ import 'dotenv/config';
 import 'reflect-metadata';
 import './config/module-alias';
 
+import { execSync } from 'node:child_process';
+
 import { logger } from './config/logger';
 import { prisma } from './database';
 
 const main = async (): Promise<void> => {
   try {
+    execSync('npx prisma migrate deploy');
     await prisma.$connect();
     const app = (await import('./app')).default;
 
