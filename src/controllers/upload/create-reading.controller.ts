@@ -7,9 +7,7 @@ import { createReadingBodySchema } from '@/validations';
 
 import { CreateReadingUseCase } from '@/use-cases/upload';
 
-import { ReadingAlreadyExistsError } from '@/errors';
-
-import { httpError } from '@/utils';
+import { ImageIsNotBase64Error, ReadingAlreadyExistsError } from '@/errors';
 
 type Body = z.infer<typeof createReadingBodySchema>;
 
@@ -26,8 +24,23 @@ export class CreateReadingController {
       if (!(error instanceof Error)) throw error;
 
       switch (error.constructor) {
+        case ImageIsNotBase64Error:
+          return response
+            .status(404)
+            .json({
+              error_code: 'INVALID_DATA',
+              error_description: error.message,
+            })
+            .end();
+
         case ReadingAlreadyExistsError:
-          return response.status(409).json(httpError(error)).end();
+          return response
+            .status(409)
+            .json({
+              error_code: 'DOUBLE_REPORT',
+              error_description: 'Leitura do mês já realizada',
+            })
+            .end();
         default:
           throw error;
       }

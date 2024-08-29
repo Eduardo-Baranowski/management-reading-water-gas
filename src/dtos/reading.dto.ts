@@ -51,7 +51,7 @@ export type FindAllReadingsOutPutDto = {
   measure_uuid: string;
   measure_datetime: Date;
   measure_type: string;
-  confirmed: boolean;
+  has_confirmed: boolean;
   image_url?: string;
 };
 

@@ -30,7 +30,7 @@ export const validateRequest =
     } catch (error) {
       if (error instanceof z.ZodError) {
         const errorResponse = {
-          error_code: 'MEASURE_NOT_FOUND',
+          error_code: 'INVALID_DATA',
           error_description: error.errors[0].message,
         };
         return response.status(400).json(errorResponse);
