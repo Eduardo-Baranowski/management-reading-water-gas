@@ -24,31 +24,32 @@ services:
         reservations:
           cpus: '0.5'
           memory: 512M
-  postgres-test:
-    image: postgres:16-alpine
-    profiles:
-      - test
-    ports:
-      - ${DATABASE_PORT_TEST}:5432
+
+  app:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    container_name: images-gemini
+    restart: unless-stopped
+    env_file: .env
     environment:
-      - POSTGRES_USER=${DATABASE_USER}
-      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
-      - POSTGRES_DB=${DATABASE_NAME}
-      - TZ=${TZ}
-      - PGTZ=${TZ}
-    tmpfs:
-      - /var/lib/postgresql/data
-  pgadmin:
-    image: dpage/pgadmin4
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+      - GEMINI_API_KEY= $GEMINI_API_KEY
+      - DATABASE_HOST=$DATABASE_HOST
+      - DATABASE_PORT=$DATABASE_PORT
+      - DATABASE_PORT_TEST=$DATABASE_PORT_TEST
+      - DATABASE_USER=$DATABASE_USER
+      - DATABASE_PASSWORD=$DATABASE_PASSWORD
+      - DATABASE_NAME=$DATABASE_NAME
+      - DATABASE_URL=$DATABASE_URL
+      - AWS_REGION=$AWS_REGION
+      - AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+      - AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+      - AWS_BUCKET_NAME=$AWS_BUCKET_NAME
+      - AWS_BUCKET_URL=$AWS_BUCKET_URL
     ports:
-      - ${PGADMIN_PORT}:80
-    volumes:
-      - pgadmin:/var/lib/pgadmin
+      - "80:3333"
+    depends_on:
+      - postgres
 volumes:
   postgres:
-    driver: local
-  pgadmin:
     driver: local
